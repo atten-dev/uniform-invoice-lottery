@@ -1,0 +1,6 @@
+[package]
+name = "uniform-invoice-lottery"
+version = "0.1.0"
+authors = ["John Lima <atten-dev@gmail.com>"]
+
+[dependencies]
