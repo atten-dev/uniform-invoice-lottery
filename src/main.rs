@@ -1,20 +1,77 @@
-use std::io;
+use std::env;
+use std::process;
+use std::fs::File;
+use std::io::prelude::*;
 
 mod checker;
+use checker::WinningNumbers;
+use checker::PrizeType;
+use checker::check_ticket_all;
 
 fn main() {
-    println!("Enter ticket number: ");
-    let mut ticket = String::new();
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 8 {
+        println!("Invalid arguments. Correct usage:");
+        print!("<exec> SpecialPrize, GrandPrize, RegularPrize1, RegularPrize2, RegularPrize3, ");
+        println!("AdditionalPrize <invoices file name>");
+        process::exit(1);
+    }
 
-    io::stdin().read_line(&mut ticket)
-        .expect("Failed to read ticket number");
+    for i in 1..6 {
+        if args[i].len() != 8 {
+            println!("Argument {} not 8 digits.", i);
+            process::exit(1);
+        }
+    }
+    if args[6].len() != 3 {
+        println!("AdditionalPrize should be 3 digits!");
+        process::exit(1);
+    }
+    let winning_numbers = WinningNumbers {
+        special_prize: args[1].clone(),
+        grand_prize: args[2].clone(),
+        regular_prizes: [ args[3].clone(), args[4].clone(), args[5].clone() ],
+        additional_prize: args[6].clone(),
+    };
+    println!("{:?}", winning_numbers);
 
-    println!("Enter the winning number: ");
-    let mut winning_number = String::new();
-    io::stdin().read_line(&mut winning_number)
-        .expect("Failed to read winning_number");
+    let mut f = File::open(args[7].clone()).expect("File not found");
+    let mut contents = String::new();
+    f.read_to_string(&mut contents).expect("File read failed");
 
-    //let win =
+    let tickets : Vec<&str> = contents.split("\n").map(|t| t.trim()).collect();
 
-    //println("")
+    let mut total = 0;
+    let mut winners = 0;
+    for ticket in tickets {
+        if ticket.len() == 11 {
+            let result = check_ticket_all(&winning_numbers, ticket);
+            //println!("{} {:?}", ticket, result)
+            match result {
+                PrizeType::SPECIAL => println!("{} won the Specia Prize!", ticket),
+                PrizeType::GRAND => println!("{} won the Grand Prize!", ticket),
+                PrizeType::FIRST => println!("{} won the First Prize!", ticket),
+                PrizeType::SECOND => println!("{} won the Second Prize!", ticket),
+                PrizeType::THIRD => println!("{} won the Third Prize!", ticket),
+                PrizeType::FOURTH => println!("{} won the Fourth Prize!", ticket),
+                PrizeType::FIFTH => println!("{} won the Fifth Prize!", ticket),
+                PrizeType::SIXTH => println!("{} won the Sixth Prize!", ticket),
+                PrizeType::ADDITIONAL => println!("{} won the Additional Prize!", ticket),
+                PrizeType::NONE => ()
+            }
+            if result != PrizeType::NONE {
+                winners+=1;
+            }
+            total+=1;
+        }
+        else {
+            if ticket.len() != 0
+            {
+                println!("Ticket {} is malformed. Exiting.", ticket);
+                process::exit(1);
+            }
+        }
+    }
+
+    println!("Checked {} valid tickets and found {} winners.", total, winners);
 }

@@ -1,7 +1,7 @@
 
 #[derive(PartialEq)]
 #[derive(Debug)]
-enum PrizeType {
+pub enum PrizeType {
     SPECIAL,
     GRAND,
     FIRST,
@@ -14,11 +14,12 @@ enum PrizeType {
     NONE
 }
 
-struct WinningNumbers {
-    special_prize: String,
-    grand_prize: String,
-    regular_prizes: [String; 3],
-    additional_prize: String
+#[derive(Debug)]
+pub struct WinningNumbers {
+    pub special_prize: String,
+    pub grand_prize: String,
+    pub regular_prizes: [String; 3],
+    pub additional_prize: String
 }
 
 fn check_ticket(winning_number: &str, ticket_number: &str) -> usize {
@@ -62,7 +63,7 @@ fn check_ticket_regular(regular_prizes: &[String; 3], ticket_number: &str) -> Pr
     }
 }
 
-fn check_ticket_all(winning_numbers: &WinningNumbers, ticket_number: &str) -> PrizeType
+pub fn check_ticket_all(winning_numbers: &WinningNumbers, ticket_number: &str) -> PrizeType
 {
     let special_rev = winning_numbers.special_prize.chars().rev();
     let grand_rev = winning_numbers.grand_prize.chars().rev();
@@ -94,22 +95,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn check_last_digit_off() {
+    fn test_last_digit_off() {
         assert_eq!(0, check_ticket("AB-87654320","AB-87654321"));
     }
 
     #[test]
-    fn check_full_match() {
+    fn test_full_match() {
         assert_eq!(8, check_ticket("AB-87654321","AB-87654321"));
     }
 
     #[test]
-    fn check_last_three() {
+    fn test_last_three() {
         assert_eq!(3, check_ticket("AB-87654321","AB-00000321"));
     }
 
     #[test]
-    fn check_last_two_no_match() {
+    fn test_last_two_no_match() {
         assert_eq!(0, check_ticket("AB-87654321","AB-00000021"));
     }
 /////////////////////// Convert number to prize
@@ -150,7 +151,7 @@ mod tests {
 
 ///////////////////// check_ticket_all
     #[test]
-    fn check_full_ticket() {
+    fn test_full_ticket() {
         let winning_numbers = WinningNumbers {
             special_prize: String::from("01234567"),
             grand_prize: String::from("12345678"),
@@ -166,5 +167,21 @@ mod tests {
         assert_eq!(PrizeType::FIRST, check_ticket_all(&winning_numbers, "AD-98765432"));
         assert_eq!(PrizeType::SIXTH, check_ticket_all(&winning_numbers, "BB-00000210"));
         assert_eq!(PrizeType::ADDITIONAL, check_ticket_all(&winning_numbers, "ZZ-00000765"));
+    }
+
+    #[test]
+    fn test_largest_prize_returned() {
+        let winning_numbers = WinningNumbers {
+            special_prize: String::from("98765432"),
+            grand_prize: String::from("87654321"),
+            regular_prizes: [String::from("08765432"), // Almost same as special
+                             String::from("07654321"), // Almost same as grand
+                             String::from("76543210")],
+            additional_prize: String::from("321") //Same as last 3 of both grand and reguar
+        };
+
+        assert_eq!(PrizeType::SPECIAL, check_ticket_all(&winning_numbers, "AZ-98765432"));
+        assert_eq!(PrizeType::GRAND, check_ticket_all(&winning_numbers, "AD-87654321"));
+        assert_eq!(PrizeType::FOURTH, check_ticket_all(&winning_numbers, "AF-00054321"));
     }
 }
