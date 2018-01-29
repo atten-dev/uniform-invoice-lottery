@@ -19,7 +19,7 @@ pub struct WinningNumbers {
     pub special_prize: String,
     pub grand_prize: String,
     pub regular_prizes: [String; 3],
-    pub additional_prize: String
+    pub additional_prizes: [String; 3],
 }
 
 fn check_ticket(winning_number: &str, ticket_number: &str) -> usize {
@@ -80,7 +80,13 @@ pub fn check_ticket_all(winning_numbers: &WinningNumbers, ticket_number: &str) -
     else if regular_prize_result != PrizeType::NONE {
         regular_prize_result
     }
-    else if ticket_rev.chars().take(3).eq(winning_numbers.additional_prize.chars().rev()) {
+    else if ticket_rev.chars().take(3).eq(winning_numbers.additional_prizes[0].chars().rev()) {
+        PrizeType::ADDITIONAL
+    }
+    else if ticket_rev.chars().take(3).eq(winning_numbers.additional_prizes[1].chars().rev()) {
+        PrizeType::ADDITIONAL
+    }
+    else if ticket_rev.chars().take(3).eq(winning_numbers.additional_prizes[2].chars().rev()) {
         PrizeType::ADDITIONAL
     }
     else
@@ -158,7 +164,9 @@ mod tests {
             regular_prizes: [String::from("98765432"),
                              String::from("87654321"),
                              String::from("76543210")],
-            additional_prize: String::from("765")
+            additional_prizes: [String::from("765"),
+                                String::from("654"),
+                                String::from("543")]
         };
 
         assert_eq!(PrizeType::NONE, check_ticket_all(&winning_numbers, "AZ-39842818"));
@@ -166,6 +174,8 @@ mod tests {
         assert_eq!(PrizeType::GRAND, check_ticket_all(&winning_numbers, "AD-12345678"));
         assert_eq!(PrizeType::FIRST, check_ticket_all(&winning_numbers, "AD-98765432"));
         assert_eq!(PrizeType::SIXTH, check_ticket_all(&winning_numbers, "BB-00000210"));
+        assert_eq!(PrizeType::ADDITIONAL, check_ticket_all(&winning_numbers, "XX-00000543"));
+        assert_eq!(PrizeType::ADDITIONAL, check_ticket_all(&winning_numbers, "YY-00000654"));
         assert_eq!(PrizeType::ADDITIONAL, check_ticket_all(&winning_numbers, "ZZ-00000765"));
     }
 
@@ -177,11 +187,29 @@ mod tests {
             regular_prizes: [String::from("08765432"), // Almost same as special
                              String::from("07654321"), // Almost same as grand
                              String::from("76543210")],
-            additional_prize: String::from("321") //Same as last 3 of both grand and reguar
+            additional_prizes: [String::from("321"), //Same as last 3 of both grand and reguar
+                                String::from("432"), //Same as last 3 of both special and reguar
+                                String::from("314")]
         };
 
         assert_eq!(PrizeType::SPECIAL, check_ticket_all(&winning_numbers, "AZ-98765432"));
         assert_eq!(PrizeType::GRAND, check_ticket_all(&winning_numbers, "AD-87654321"));
         assert_eq!(PrizeType::FOURTH, check_ticket_all(&winning_numbers, "AF-00054321"));
+    }
+
+    #[test]
+    fn test_no_preceding_letters() {
+        let winning_numbers = WinningNumbers {
+            special_prize: String::from("01234567"),
+            grand_prize: String::from("12345678"),
+            regular_prizes: [String::from("98765432"),
+                             String::from("87654321"),
+                             String::from("76543210")],
+            additional_prizes: [String::from("765"),
+                                String::from("654"),
+                                String::from("543")]
+        };
+
+        assert_eq!(PrizeType::FIRST, check_ticket_all(&winning_numbers, "98765432"));
     }
 }

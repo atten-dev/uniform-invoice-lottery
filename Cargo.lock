@@ -1,4 +1,4 @@
-[root]
+[[package]]
 name = "uniform-invoice-lottery"
 version = "0.1.0"
 

@@ -10,10 +10,10 @@ use checker::check_ticket_all;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 8 {
+    if args.len() != 10 {
         println!("Invalid arguments. Correct usage:");
         print!("<exec> SpecialPrize, GrandPrize, RegularPrize1, RegularPrize2, RegularPrize3, ");
-        println!("AdditionalPrize <invoices file name>");
+        println!("AdditionalPrize1 AdditionalPrize2 AdditionalPrize3 <invoices file name>");
         process::exit(1);
     }
 
@@ -23,7 +23,7 @@ fn main() {
             process::exit(1);
         }
     }
-    if args[6].len() != 3 {
+    if args[6].len() != 3 && args[7].len() != 3 && args[8].len() != 3 {
         println!("AdditionalPrize should be 3 digits!");
         process::exit(1);
     }
@@ -31,11 +31,11 @@ fn main() {
         special_prize: args[1].clone(),
         grand_prize: args[2].clone(),
         regular_prizes: [ args[3].clone(), args[4].clone(), args[5].clone() ],
-        additional_prize: args[6].clone(),
+        additional_prizes: [ args[6].clone(), args[7].clone(), args[8].clone() ],
     };
     println!("{:?}", winning_numbers);
 
-    let mut f = File::open(args[7].clone()).expect("File not found");
+    let mut f = File::open(args[9].clone()).expect("File not found");
     let mut contents = String::new();
     f.read_to_string(&mut contents).expect("File read failed");
 
@@ -44,7 +44,7 @@ fn main() {
     let mut total = 0;
     let mut winners = 0;
     for ticket in tickets {
-        if ticket.len() == 11 {
+        if ticket.len() == 11 || ticket.len() == 8 {
             let result = check_ticket_all(&winning_numbers, ticket);
             //println!("{} {:?}", ticket, result)
             match result {
