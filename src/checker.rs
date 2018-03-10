@@ -26,9 +26,9 @@ fn check_ticket(winning_number: &str, ticket_number: &str) -> usize {
     let mut max_length = 0;
 
     for length in (3..9).rev() {
-        let winning_reverse: String = winning_number.chars().rev().collect();
-        let ticket_reverse: String = ticket_number.chars().rev().collect();
-        if winning_reverse[0..length] == ticket_reverse[0..length] {
+        let winning_reverse = winning_number.chars().rev().take(length);
+        let ticket_reverse = ticket_number.chars().rev().take(length);
+        if winning_reverse.eq(ticket_reverse){
             max_length = length;
             break;
         }
